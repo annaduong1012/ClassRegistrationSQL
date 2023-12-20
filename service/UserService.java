@@ -56,8 +56,8 @@ public class UserService {
 			User currentUser = new User();
 			currentUser.setUserID(resultSet.getString("username"));
 			currentUser.setUserPassword(resultSet.getString("password"));
-			currentUser.setName(resultSet.getString("name"));
-			currentUser.setFailedCount(resultSet.getInt("failed_count"));
+			currentUser.setName(resultSet.getString("student_name"));
+			currentUser.setFailedCount(resultSet.getInt("failed_login"));
 
 			if (currentUser.getFailedCount() >= 3) {
 				System.out.println("Your account has been locked. Please contact Support to unlock your account.");
@@ -96,9 +96,63 @@ public class UserService {
 		Connection connection = DBConnection.makeConnection();
 		Statement stmt = connection.createStatement();
 
-		String showCourseSQL = "select student_id, course_name from enrolled_course e\n"
-				+ "join courses c on e.course_id = c.id\n";
+		String showCourseSQL = "select username, course_id, course_name from enrolled_course e\n"
+				+ "join courses c on e.course_id = c.id\n" + "join students s on e.student_id = s.id\n"
+				+ "where username = ?;";
 
-		PreparedStatement showCourseStmt = connection.prepareStatement(showCourseSQL);
+		PreparedStatement preStmt = connection.prepareStatement(showCourseSQL);
+		preStmt.setString(1, user.getUserID());
+		ResultSet resultSet = preStmt.executeQuery();
+
+		System.out.println("Courses registered by " + user.getName() + " :");
+		System.out.println("-------------------------------------");
+		while (resultSet.next()) {
+			int courseID = resultSet.getInt("course_id");
+			String courseName = resultSet.getString("course_name");
+
+			System.out.println("Course ID: " + courseID + " | " + courseName);
+			System.out.println("-------------------------------------");
+		}
+
+	}
+
+	// Register new course
+	public static void registerNewCourses(User user, int courseID) throws SQLException {
+		Connection connection = DBConnection.makeConnection();
+		Statement stmt = connection.createStatement();
+
+		String enrolledCourseSQL = "select student_id, username, course_id, course_name from enrolled_course e\n"
+				+ "join courses c on e.course_id = c.id\n" + "join students s on e.student_id = s.id\n"
+				+ "where username = ?;";
+
+		PreparedStatement preStmt = connection.prepareStatement(enrolledCourseSQL);
+		preStmt.setString(1, user.getUserID());
+
+		ResultSet resultSet = preStmt.executeQuery();
+
+		if (resultSet.next()) {
+			int courseid = resultSet.getInt("course_id");
+			String courseName = resultSet.getString("course_name");
+			Course course = new Course(courseid, courseName);
+			
+			System.out.println("You have already registered this course: " + course.getCourseName());
+		} else {
+			String addCourseSQL = "INSERT INTO enrolled_course (student_id, course_id) VALUES (?, ?);";
+			PreparedStatement addCourseStmt = connection.prepareStatement(addCourseSQL);
+			addCourseStmt.setInt(1, user.getStudentID());
+			addCourseStmt.setInt(2, courseID);
+
+			int rowsAffected = addCourseStmt.executeUpdate();
+
+		    if (rowsAffected > 0) {
+		        System.out.println("Course has been registered successfully!");
+		        System.out.println("-------------------------------------");
+		    } else {
+		        System.out.println("Failed to register the course.");
+		        System.out.println("-------------------------------------");
+		    }
+
+		}
+
 	}
 }

@@ -32,8 +32,6 @@ public class Course {
 		this.courseID = courseID;
 		this.courseName = courseName;
 	}
-	
-	
 
 	public Course(int courseID, String courseName, Date beginDate, Date endDate, int fee) {
 		super();

@@ -1,5 +1,6 @@
 package course.registration;
 
+import java.sql.SQLException;
 import java.util.Scanner;
 
 import course.registration.data.Course;
@@ -8,7 +9,7 @@ import course.registration.service.CourseService;
 import course.registration.service.UserService;
 
 public class Main {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws SQLException {
 
 		final int DO_LOGIN = 1;
 		final int DO_REGISTER = 2;
@@ -48,7 +49,7 @@ public class Main {
 	}
 
 	// register function
-	public static void registerFunction() {
+	public static void registerFunction() throws SQLException {
 		Scanner keyboard = new Scanner(System.in);
 		UserService userService = new UserService();
 		System.out.println("Please register your account: ");
@@ -63,7 +64,7 @@ public class Main {
 	}
 
 	// login function:
-	public static User logInAccount() {
+	public static User logInAccount() throws SQLException {
 		Scanner keyboard = new Scanner(System.in);
 		UserService userService = new UserService();
 
@@ -82,10 +83,10 @@ public class Main {
 	}
 
 	// course menu:
-	public static void courseMenuFunction(User loggedInUser) {
+	public static void courseMenuFunction(User loggedInUser) throws SQLException {
 		while (true) {
 			if (loggedInUser != null) {
-				System.out.println("----------");
+		        System.out.println("-------------------------------------");
 				System.out.println("Below is the course menu: ");
 				System.out.println("0. View Your Registered Courses");
 				CourseService.showAllCourses();
@@ -98,46 +99,48 @@ public class Main {
 	}
 
 	// selectCourse function
-	public static void courseMenuChoice(User loggedInUser) {
+	public static void courseMenuChoice(User loggedInUser) throws SQLException {
 		final int VIEW_REGISTERED_COURSE = 0;
 		Scanner keyboard = new Scanner(System.in);
 		int courseOption = keyboard.nextInt();
 
 		if (courseOption == VIEW_REGISTERED_COURSE) {
 			UserService.showRegisterCourseByUser(loggedInUser);
-		} else if (courseOption >= 1 && courseOption <= Database.COURSES_DB.size()) {
-			showSelectedCourseMenu(loggedInUser, Database.COURSES_DB.get(courseOption - 1));
+			
+			//to do 
+		} else if (courseOption >= 1 && courseOption <= 4) {
+			showSelectedCourseMenu(loggedInUser, courseOption);
 		} else {
 			System.out.println("Invalid option. Please enter again.");
 		}
 	}
 
 	// selected Course Menu
-	public static void showSelectedCourseMenu(User loggedInUser, Course course) {
-		System.out.println("----------");
-		CourseService.showCourseDetails(course);
-		System.out.println("----------");
+	public static void showSelectedCourseMenu(User loggedInUser, int courseID) throws SQLException {
+        System.out.println("-------------------------------------");
+		CourseService.showCourseDetails(courseID);
+        System.out.println("-------------------------------------");
 		System.out.println("1. Register Course");
 		System.out.println("2. View Mentor Details");
-		System.out.println("----------");
+        System.out.println("-------------------------------------");
 		System.out.println("Please select your option or any number to exit: ");
-		selectedCourseOption(loggedInUser, course);
+		selectedCourseOption(loggedInUser, courseID);
 	}
 
 	// Register Course or View Mentor Details
 	final static int REGISTER_NEW_COURSE = 1;
 	final static int SHOW_MENTOR = 2;
 
-	public static void selectedCourseOption(User loggedInUser, Course course) {
+	public static void selectedCourseOption(User loggedInUser, int courseID) throws SQLException {
 		Scanner keyboard = new Scanner(System.in);
 		int selectedCourseMenuUserOption = keyboard.nextInt();
 
 		switch (selectedCourseMenuUserOption) {
 		case REGISTER_NEW_COURSE:
-			UserService.registerNewCourses(loggedInUser, course);
+			UserService.registerNewCourses(loggedInUser, courseID);
 			break;
 		case SHOW_MENTOR:
-			CourseService.showMentorInfoByCourse(course);
+			CourseService.showMentorInfoByCourse(courseID);
 			break;
 		default:
 			System.out.println("Invalid option. Please enter again.");

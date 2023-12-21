@@ -29,16 +29,21 @@ public class UserService {
 		if (resultSet.next()) {
 			System.out.println("Account already existed. Please register with a different userID or login.");
 		} else {
-			String addUserSQL = "INSERT INTO students (name, username, password) VALUES (?, ?, ?);";
+			String addUserSQL = "INSERT INTO students (student_name, username, password) VALUES (?, ?, ?);";
 			PreparedStatement addUserStmt = connection.prepareStatement(addUserSQL);
 
 			addUserStmt.setString(1, name);
 			addUserStmt.setString(2, userID);
 			addUserStmt.setString(3, userPassword);
+			int rowsAffected = addUserStmt.executeUpdate();
 
-			System.out.println("Welcome " + name + "! Account Registered Successfully!");
+			if (rowsAffected > 0) {
+				System.out.println("Welcome " + name + "! Account Registered Successfully!");
+			} else {
+				System.out.println("Failed to register the account.");
+			}
+
 		}
-
 	}
 
 	// Return login account
@@ -82,7 +87,7 @@ public class UserService {
 		Connection connection = DBConnection.makeConnection();
 		Statement stmt = connection.createStatement();
 
-		String updateFailedAttemptSQL = "UPDATE students SET failed_count = ? WHERE username = ?;";
+		String updateFailedAttemptSQL = "UPDATE students SET failed_login = ? WHERE username = ?;";
 
 		PreparedStatement updateStmt = connection.prepareStatement(updateFailedAttemptSQL);
 		updateStmt.setInt(1, failedCount);
@@ -134,7 +139,7 @@ public class UserService {
 			int courseid = resultSet.getInt("course_id");
 			String courseName = resultSet.getString("course_name");
 			Course course = new Course(courseid, courseName);
-			
+
 			System.out.println("You have already registered this course: " + course.getCourseName());
 		} else {
 			String addCourseSQL = "INSERT INTO enrolled_course (student_id, course_id) VALUES (?, ?);";
@@ -144,13 +149,13 @@ public class UserService {
 
 			int rowsAffected = addCourseStmt.executeUpdate();
 
-		    if (rowsAffected > 0) {
-		        System.out.println("Course has been registered successfully!");
-		        System.out.println("-------------------------------------");
-		    } else {
-		        System.out.println("Failed to register the course.");
-		        System.out.println("-------------------------------------");
-		    }
+			if (rowsAffected > 0) {
+				System.out.println("Course has been registered successfully!");
+				System.out.println("-------------------------------------");
+			} else {
+				System.out.println("Failed to register the course.");
+				System.out.println("-------------------------------------");
+			}
 
 		}
 

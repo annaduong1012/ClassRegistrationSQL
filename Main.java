@@ -86,14 +86,14 @@ public class Main {
 	public static void courseMenuFunction(User loggedInUser) throws SQLException {
 		while (true) {
 			if (loggedInUser != null) {
-		        System.out.println("-------------------------------------");
+				System.out.println("-------------------------------------");
 				System.out.println("Below is the course menu: ");
 				System.out.println("0. View Your Registered Courses");
 				CourseService.showAllCourses();
 				System.out.println("Please select an option or any number to exit");
 				courseMenuChoice(loggedInUser);
 			} else {
-				return;
+				break;
 			}
 		}
 	}
@@ -106,23 +106,23 @@ public class Main {
 
 		if (courseOption == VIEW_REGISTERED_COURSE) {
 			UserService.showRegisterCourseByUser(loggedInUser);
-			
-			//to do 
+			courseMenuFunction(loggedInUser);
+			// to do
 		} else if (courseOption >= 1 && courseOption <= 4) {
 			showSelectedCourseMenu(loggedInUser, courseOption);
 		} else {
-			System.out.println("Invalid option. Please enter again.");
+			return;
 		}
 	}
 
 	// selected Course Menu
 	public static void showSelectedCourseMenu(User loggedInUser, int courseID) throws SQLException {
-        System.out.println("-------------------------------------");
+		System.out.println("-------------------------------------");
 		CourseService.showCourseDetails(courseID);
-        System.out.println("-------------------------------------");
+		System.out.println("-------------------------------------");
 		System.out.println("1. Register Course");
 		System.out.println("2. View Mentor Details");
-        System.out.println("-------------------------------------");
+		System.out.println("-------------------------------------");
 		System.out.println("Please select your option or any number to exit: ");
 		selectedCourseOption(loggedInUser, courseID);
 	}
@@ -143,7 +143,7 @@ public class Main {
 			CourseService.showMentorInfoByCourse(courseID);
 			break;
 		default:
-			System.out.println("Invalid option. Please enter again.");
+			courseMenuFunction(loggedInUser);
 			break;
 		}
 	}

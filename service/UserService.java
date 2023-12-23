@@ -116,7 +116,6 @@ public class UserService {
 			String courseName = resultSet.getString("course_name");
 
 			System.out.println("Course ID: " + courseID + " | " + courseName);
-			System.out.println("-------------------------------------");
 		}
 
 	}
@@ -126,38 +125,52 @@ public class UserService {
 		Connection connection = DBConnection.makeConnection();
 		Statement stmt = connection.createStatement();
 
-		String enrolledCourseSQL = "select student_id, username, course_id, course_name from enrolled_course e\n"
-				+ "join courses c on e.course_id = c.id\n" + "join students s on e.student_id = s.id\n"
-				+ "where username = ?;";
+		// Retrieve studentID from username
+		String getIdSQL = "select id from students\n" + "where username = ?";
+		PreparedStatement getIdStmt = connection.prepareStatement(getIdSQL);
+		getIdStmt.setString(1, user.getUserID());
 
-		PreparedStatement preStmt = connection.prepareStatement(enrolledCourseSQL);
-		preStmt.setString(1, user.getUserID());
+		ResultSet getId = getIdStmt.executeQuery();
+		int studentID;
 
-		ResultSet resultSet = preStmt.executeQuery();
+		if (getId.next()) {
+			studentID = getId.getInt("id");
 
-		if (resultSet.next()) {
-			int courseid = resultSet.getInt("course_id");
-			String courseName = resultSet.getString("course_name");
-			Course course = new Course(courseid, courseName);
+			// Check if this course has been registered
+			String enrolledCourseSQL = "select student_id, course_id, course_name\n" + "from enrolled_course ec\n"
+					+ "join courses c on ec.course_id = c.id \n" + "where student_id = ? and course_id = ?;";
 
-			System.out.println("You have already registered this course: " + course.getCourseName());
-		} else {
-			String addCourseSQL = "INSERT INTO enrolled_course (student_id, course_id) VALUES (?, ?);";
-			PreparedStatement addCourseStmt = connection.prepareStatement(addCourseSQL);
-			addCourseStmt.setInt(1, user.getStudentID());
-			addCourseStmt.setInt(2, courseID);
+			PreparedStatement preStmt = connection.prepareStatement(enrolledCourseSQL);
+			preStmt.setInt(1, studentID);
+			preStmt.setInt(2, courseID);
 
-			int rowsAffected = addCourseStmt.executeUpdate();
+			ResultSet resultSet = preStmt.executeQuery();
 
-			if (rowsAffected > 0) {
-				System.out.println("Course has been registered successfully!");
-				System.out.println("-------------------------------------");
+			if (resultSet.next()) {
+				int courseid = resultSet.getInt("course_id");
+				String courseName = resultSet.getString("course_name");
+				Course course = new Course(courseid, courseName);
+
+				System.out.println("You have already registered this course: " + course.getCourseName());
 			} else {
-				System.out.println("Failed to register the course.");
-				System.out.println("-------------------------------------");
+				
+				// Register course if not already registered
+				String addCourseSQL = "INSERT INTO enrolled_course (student_id, course_id) VALUES (?, ?);";
+				PreparedStatement addCourseStmt = connection.prepareStatement(addCourseSQL);
+				addCourseStmt.setInt(1, studentID);
+				addCourseStmt.setInt(2, courseID);
+
+				int rowsAffected = addCourseStmt.executeUpdate();
+
+				if (rowsAffected > 0) {
+					System.out.println("Course has been registered successfully!");
+					System.out.println("-------------------------------------");
+				} else {
+					System.out.println("Failed to register the course.");
+					System.out.println("-------------------------------------");
+				}
+
 			}
-
 		}
-
 	}
 }

@@ -93,7 +93,6 @@ public class UserService {
 		updateStmt.setInt(1, failedCount);
 		updateStmt.setString(2, userID);
 		updateStmt.executeUpdate();
-
 	}
 
 	// Show registered course
@@ -153,7 +152,7 @@ public class UserService {
 
 				System.out.println("You have already registered this course: " + course.getCourseName());
 			} else {
-				
+
 				// Register course if not already registered
 				String addCourseSQL = "INSERT INTO enrolled_course (student_id, course_id) VALUES (?, ?);";
 				PreparedStatement addCourseStmt = connection.prepareStatement(addCourseSQL);

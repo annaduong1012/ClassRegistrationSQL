@@ -80,11 +80,11 @@ public class CourseService {
 
 			Mentor mentorByCourse = new Mentor(mentorname, expertise, workplace);
 
-	        System.out.println("-------------------------------------");
+			System.out.println("-------------------------------------");
 			System.out.println("- Mentor Name: " + mentorByCourse.getName());
 			System.out.println("- Job Title: " + mentorByCourse.getExpertise());
 			System.out.println("- Workplace: " + mentorByCourse.getWorkPlace());
-	        System.out.println("-------------------------------------");
+			System.out.println("-------------------------------------");
 		}
 
 	}
